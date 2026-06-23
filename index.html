@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="description" content="ShopFlow - A modern, responsive, and secure local-first shop management and cashier system.">
+    <meta name="theme-color" content="#f5f5f7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="robots" content="index, follow">
+    
+    <title>ShopFlow</title>
+    
+    <!-- Lightweight Inline SVG Favicon -->
+    
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <!-- Sticky Header -->
+    <header class="glass sticky-header" role="banner">
+        <div class="header-content">
+            <div class="logo" aria-label="ShopFlow Logo">
+                <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+            </div>
+            <div class="header-actions" aria-label="Application Actions">
+                <button type="button" id="export-md-btn" class="btn btn-outline btn-sm" title="Monthly Report (MD)" aria-label="Export Monthly Report to Markdown">
+                    <i data-lucide="file-text" aria-hidden="true"></i>
+                </button>
+                <button type="button" id="export-json-btn" class="btn btn-icon" title="Backup Data" aria-label="Export JSON Backup">
+                    <i data-lucide="download" aria-hidden="true"></i>
+                </button>
+                <button type="button" id="import-json-btn" class="btn btn-icon" title="Restore Data" aria-label="Import JSON Backup">
+                    <i data-lucide="upload" aria-hidden="true"></i>
+                </button>
+                <input type="file" id="import-file" accept=".json" style="display:none;" aria-hidden="true" tabindex="-1">
+                <button type="button" id="theme-toggle" class="btn btn-icon" aria-label="Toggle Dark Theme" title="Toggle Theme">
+                    <i data-lucide="moon" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" role="main" id="main-content">
+        <!-- Overall Summary Dashboard -->
+        <section class="glass dashboard-card slide-up" aria-labelledby="overview-heading">
+            <div class="dashboard-header">
+                <h2 id="overview-heading"><i data-lucide="globe" aria-hidden="true"></i> Overview</h2>
+            </div>
+            <div class="dashboard-grid">
+                <div class="stat-box blue" aria-labelledby="stat-cash">
+                    <span id="stat-cash">Total Cash</span>
+                    <h3 id="overall-cash">₹0</h3>
+                </div>
+                <div class="stat-box red" aria-labelledby="stat-expenses">
+                    <span id="stat-expenses">Total Expenses</span>
+                    <h3 id="overall-expenses">₹0</h3>
+                </div>
+                <div class="stat-box green" aria-labelledby="stat-profit">
+                    <span id="stat-profit">Total Profit</span>
+                    <h3 id="overall-profit">₹0</h3>
+                </div>
+                <div class="stat-box purple" aria-labelledby="stat-shops">
+                    <span id="stat-shops">Total Shops / Txns</span>
+                    <h3 id="overall-stats">0 / 0</h3>
+                </div>
+            </div>
+        </section>
+
+        <!-- Shops Section -->
+        <section class="section-header slide-up" style="animation-delay: 0.1s" aria-labelledby="workspaces-heading">
+            <h2 id="workspaces-heading"><i data-lucide="store" aria-hidden="true"></i> Workspaces</h2>
+            <button type="button" id="add-shop-btn" class="btn btn-primary" aria-label="Create New Shop Workspace">
+                <i data-lucide="plus" aria-hidden="true"></i> New Shop
+            </button>
+        </section>
+        
+        <div id="shops-container" class="shops-grid slide-up" style="animation-delay: 0.2s" aria-live="polite">
+            <!-- Shop cards injected here -->
+        </div>
+
+        <!-- Calculator & Print Section -->
+        <section class="glass calc-section slide-up" style="animation-delay: 0.3s" aria-labelledby="register-heading">
+            <h2 id="register-heading"><i data-lucide="calculator" aria-hidden="true"></i> Daily Register</h2>
+            <div class="calc-grid">
+                <div class="denominations">
+                    <div class="form-group">
+                        <label for="calc-shop-select">Select Workspace:</label>
+                        <select id="calc-shop-select" class="form-input" aria-label="Select workspace to calculate register"></select>
+                    </div>
+                    <div id="denom-inputs" aria-live="polite">
+                        <!-- Inputs injected via JS -->
+                    </div>
+                    <div class="form-group mt-4">
+                        <label for="calc-yesterday">Yesterday's Closing (₹):</label>
+                        <input type="number" id="calc-yesterday" class="form-input denom-calc" placeholder="0" min="0" inputmode="numeric">
+                    </div>
+                </div>
+                <div class="calc-summary glass text-center" aria-live="polite">
+                    <h3>Current Drawer</h3>
+                    <h1 id="calc-total" class="text-blue">₹0</h1>
+                    <div id="calc-pl-box" class="pl-box glass mt-4">
+                        <span id="calc-pl-label">Break Even</span>
+                        <h2 id="calc-pl-amount">₹0</h2>
+                    </div>
+                    <div class="action-grid mt-4">
+                        <button type="button" id="save-report-btn" class="btn btn-primary btn-full" aria-label="Save Daily Report">
+                            <i data-lucide="save" aria-hidden="true"></i> Save
+                        </button>
+                        <button type="button" id="print-report-btn" class="btn btn-outline btn-full" aria-label="Print Daily Report">
+                            <i data-lucide="printer" aria-hidden="true"></i> Print
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- History Table -->
+        <section class="glass history-section slide-up" style="animation-delay: 0.4s" aria-labelledby="history-heading">
+            <div class="history-header">
+                <h2 id="history-heading"><i data-lucide="history" aria-hidden="true"></i> Activity Log</h2>
+                <div class="filters" role="search" aria-label="Activity Log Filters">
+                    <label for="filter-date" class="sr-only" style="display:none;">Filter by Date</label>
+                    <input type="date" id="filter-date" class="form-input" aria-label="Filter by Date">
+                    
+                    <label for="filter-shop" class="sr-only" style="display:none;">Filter by Shop</label>
+                    <select id="filter-shop" class="form-input" aria-label="Filter by Shop">
+                        <option value="ALL">All</option>
+                    </select>
+                    
+                    <label for="filter-type" class="sr-only" style="display:none;">Filter by Transaction Type</label>
+                    <select id="filter-type" class="form-input" aria-label="Filter by Transaction Type">
+                        <option value="ALL">All Types</option>
+                        <option value="IN">IN</option>
+                        <option value="OUT">OUT</option>
+                    </select>
+                    
+                    <label for="search-reason" class="sr-only" style="display:none;">Search Logs</label>
+                    <input type="text" id="search-reason" class="form-input" placeholder="Search logs..." aria-label="Search logs by reason or category">
+                </div>
+            </div>
+            <div class="table-responsive" tabindex="0" aria-label="Activity Log Table Scroll Area">
+                <table id="history-table" aria-label="Transaction History">
+                    <thead>
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Shop</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Details</th>
+                            <th scope="col">Balance</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody" aria-live="polite"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- macOS style Modal -->
+    <div id="tx-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="tx-modal-title">
+        <div class="modal glass">
+            <div class="modal-header">
+                <div class="mac-controls" aria-hidden="true">
+                    <span class="dot red close-modal" style="cursor:pointer" role="button" aria-label="Close Modal" tabindex="0"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <h3 id="tx-modal-title" style="margin: 0 auto; padding-right: 40px;">Transaction</h3>
+            </div>
+            <form id="tx-form" aria-label="Transaction Form">
+                <input type="hidden" id="tx-shop-id">
+                <input type="hidden" id="tx-type">
+                
+                <div class="form-group">
+                    <label for="tx-amount">Amount (₹)</label>
+                    <input type="number" id="tx-amount" class="form-input" required min="1" step="0.01" inputmode="decimal" placeholder="0.00">
+                </div>
+                
+                <!-- Category Dropdown -->
+                <div class="form-group" id="tx-category-group" style="display:none;">
+                    <label for="tx-category">Expense Category</label>
+                    <select id="tx-category" class="form-input">
+                        <option value="Shop Expense">Shop Expense</option>
+                        <option value="Home Expense">Home Expense</option>
+                        <option value="Kitchen Expense">Kitchen Expense</option>
+                        <option value="Other Expense">Other Expense</option>
+                    </select>
+                </div>
+
+                <!-- Return Dropdown -->
+                <div class="form-group" id="tx-return-group" style="display:none;">
+                    <label for="tx-return-type">Return Type</label>
+                    <select id="tx-return-type" class="form-input">
+                        <option value="CUST">Customer Return (Refund Cash OUT)</option>
+                        <option value="SUPP">Supplier Return (Receive Cash IN)</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="tx-supplier-group" style="display:none;">
+                    <label for="tx-supplier">Supplier / Vendor</label>
+                    <input type="text" id="tx-supplier" class="form-input" placeholder="e.g. Acme Corp" autocomplete="organization">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tx-reason">Description</label>
+                    <input type="text" id="tx-reason" class="form-input" required placeholder="Reason for transaction" autocomplete="off">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tx-date">Date</label>
+                    <input type="date" id="tx-date" class="form-input" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full mt-4">Confirm</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <i id="toast-icon" data-lucide="check-circle" aria-hidden="true"></i>
+        <span id="toast-msg">Success</span>
+    </div>
+
+    <!-- Application Scripts -->
+    <script src="storage.js"></script>
+    <script src="ui.js"></script>
+    <script src="reports.js"></script>
+    <script src="shops.js"></script>
+    <script src="transactions.js"></script>
+    <script src="calculator.js"></script>
+    <script src="history.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+
